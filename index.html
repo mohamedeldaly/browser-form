@@ -131,6 +131,17 @@
       const passwordConfirmError = document.querySelector(
         "#PasswordConfirm + span.error"
       );
+      const country = document.getElementById("Country");
+      const countryError = document.querySelector("#Country + span.error");
+      country.addEventListener('input', (event) => {
+        if (country.value === "") {
+          countryError.textContent = "Please select a country.";
+          countryError.className = "error active";
+        } else {
+          countryError.innerHTML = "";
+          countryError.className = "error";
+        }
+      })
       passwordConfirm.addEventListener("input", (event) => {
         if (passwordConfirm.value !== password.value) {
           passwordConfirmError.textContent = "Passwords do not match.";
@@ -164,12 +175,21 @@
           showemailError();
           event.preventDefault();
         }
+        if (!country.value) {
+          countryError.textContent = "Please select a country.";
+          event.preventDefault();
+        }
         if (!ZIPField.validity.valid) {
           showZIPError();
           event.preventDefault();
         }
         if (!password.validity.valid) {
           showPasswordError();
+          event.preventDefault();
+        }
+        if (!passwordConfirm.validity.valid || passwordConfirm.value!== password.value) {
+          passwordConfirmError.textContent = "Passwords do not match.";
+          passwordConfirmError.className = "error active";
           event.preventDefault();
         }
       });
