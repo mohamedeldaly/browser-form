@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Detailed custom validation</title>
+    <style>
+      body {
+        font: 1em sans-serif;
+        width: 200px;
+        padding: 0;
+        margin: 0 auto;
+      }
+      p * {
+        display: block;
+      }
+      input {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        border: 1px solid #333;
+        margin: 0;
+        font-family: inherit;
+        font-size: 90%;
+        box-sizing: border-box;
+      }
+      input:invalid {
+        border-color: #900;
+        background-color: #fdd;
+      }
+      input:focus:invalid {
+        outline: none;
+      }
+      select {
+        width: 100%;
+        border: 1px solid #333;
+        margin: 0;
+        font-family: inherit;
+        font-size: 90%;
+        box-sizing: border-box;
+      }
+      select:invalid {
+        border-color: #900;
+        background-color: #fdd;
+      }
+      select:focus:invalid {
+        outline: none;
+      }
+      .error {
+        width: 100%;
+        padding: 0;
+        font-size: 80%;
+        color: white;
+        background-color: #900;
+        border-radius: 0 0 5px 5px;
+        box-sizing: border-box;
+      }
+      .error.active {
+        padding: 0.3em;
+      }
+    </style>
+  </head>
+  <body>
+    <form novalidate>
+      <div>
+        <p>
+          <label for="mail">
+            <span>Please enter an email address:</span>
+            <input type="email" id="mail" name="mail" required minlength="8" />
+            <span class="error" aria-live="polite"></span>
+          </label>
+        </p>
+        <p>
+          <label for="country">
+            <span>Country : </span>
+            <select id="Country" required>
+              <option value="" disabled selected>Select a country</option>
+              <option value="ch">Switzerland</option>
+              <option value="fr">France</option>
+              <option value="de">Germany</option>
+              <option value="nl">The Netherlands</option>
+            </select>
+            <span class="error" aria-live="polite"></span>
+          </label>
+        </p>
+        <p>
+          <label for="ZIP">
+            <span>ZIP : </span>
+            <input type="text" id="ZIP" name="ZIP" required />
+            <span class="error" aria-live="polite"></span>
+          </label>
+        </p>
+        <p>
+          <label for="Password">
+            <span>Password : </span>
+            <input
+              type="password"
+              id="Password"
+              name="Password"
+              required
+              minlength="8"
+            />
+            <span class="error" aria-live="polite"></span>
+          </label>
+        </p>
+        <p>
+          <label for="PasswordConfirm">
+            <span>Password Confirm :</span>
+            <input
+              type="password"
+              id="PasswordConfirm"
+              name="PasswordConfirm"
+              required
+              minlength="8"
+            />
+            <span class="error" aria-live="polite"></span>
+          </label>
+        </p>
+        <button>Submit</button>
+      </div>
+    </form>
+    <script>
+      const form = document.getElementsByTagName("form")[0];
+      const email = document.getElementById("mail");
+      const emailError = document.querySelector("#mail + span.error");
+      const ZIPField = document.getElementById("ZIP");
+      const ZIPError = document.querySelector("#ZIP + span.error");
+      const password = document.querySelector("#Password");
+      const passwordError = document.querySelector("#Password + span.error");
+      const passwordConfirm = document.querySelector("#PasswordConfirm");
+      const passwordConfirmError = document.querySelector(
+        "#PasswordConfirm + span.error"
+      );
+      passwordConfirm.addEventListener("input", (event) => {
+        if (passwordConfirm.value !== password.value) {
+          passwordConfirmError.textContent = "Passwords do not match.";
+          passwordConfirmError.className = "error active";
+        } else {
+          passwordConfirmError.innerHTML = "";
+          passwordConfirmError.className = "error";
+        }
+      });
+      password.addEventListener("input", (event) => {
+        if (password.validity.valid) {
+          passwordError.innerHTML = "";
+          passwordError.className = "error";
+        } else {
+          showPasswordError();
+        }
+      });
+      ZIPField.addEventListener("input", (event) => {
+        showZIPError();
+      });
+      email.addEventListener("input", function (event) {
+        if (email.validity.valid) {
+          emailError.innerHTML = "";
+          emailError.className = "error";
+        } else {
+          showemailError();
+        }
+      });
+      form.addEventListener("submit", function (event) {
+        if (!email.validity.valid) {
+          showemailError();
+          event.preventDefault();
+        }
+        if (!ZIPField.validity.valid) {
+          showZIPError();
+          event.preventDefault();
+        }
+        if (!password.validity.valid) {
+          showPasswordError();
+          event.preventDefault();
+        }
+      });
+      function showPasswordError() {
+        if (password.validity.valueMissing) {
+          passwordError.textContent = "You need to enter a password.";
+        } else if (password.validity.tooShort) {
+          passwordError.textContent = `Password should be at least ${password.minLength} characters; you entered ${password.value.length}.`;
+        }
+        passwordError.className = "error active";
+      }
+      function showemailError() {
+        if (email.validity.valueMissing) {
+          emailError.textContent = "You need to enter an e-mail address.";
+        } else if (email.validity.typeMismatch) {
+          emailError.textContent =
+            "Entered value needs to be an e-mail address.";
+        } else if (email.validity.tooShort) {
+          emailError.textContent = `Email should be at least ${email.minLength} characters; you entered ${email.value.length}.`;
+        }
+        emailError.className = "error active";
+      }
+      function showZIPError() {
+        const constraints = {
+          ch: [
+            "^(CH-)?\\d{4}$",
+            "Switzerland ZIPs must have exactly 4 digits: e.g. CH-1950 or 1950",
+          ],
+          fr: [
+            "^(F-)?\\d{5}$",
+            "France ZIPs must have exactly 5 digits: e.g. F-75012 or 75012",
+          ],
+          de: [
+            "^(D-)?\\d{5}$",
+            "Germany ZIPs must have exactly 5 digits: e.g. D-12345 or 12345",
+          ],
+          nl: [
+            "^(NL-)?\\d{4}\\s*([A-RT-Z][A-Z]|S[BCE-RT-Z])$",
+            "Netherland ZIPs must have exactly 4 digits, followed by 2 letters except SA, SD and SS",
+          ],
+        };
+        const country = document.getElementById("Country").value;
+        const constraint = new RegExp(constraints[country][0], "");
+        if (constraint.test(ZIPField.value)) {
+          ZIPField.setCustomValidity("");
+          ZIPError.innerHTML = "";
+          ZIPError.className = "error";
+        } else {
+          ZIPField.setCustomValidity(constraints[country][1]);
+          ZIPError.innerHTML = constraints[country][1];
+          ZIPError.className = "error active";
+        }
+      }
+      window.onload = () => {
+        document.getElementById("Country").onchange = showZIPError;
+      };
+    </script>
+  </body>
+</html>
